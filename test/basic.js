@@ -2,7 +2,7 @@ var fs     = require('fs');
 var assert = require('assert');
 var JsonDB = require('..');
 
-describe('basic', function () {
+describe('Basic API', function () {
 
   var file = './test.json';
 
