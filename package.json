@@ -1,5 +1,5 @@
 {
-  "name": "json-db",
+  "name": "@diam/json-db",
   "version": "1.0.0",
   "description": "Simple Json DB",
   "main": "index.js",
