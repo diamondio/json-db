@@ -45,7 +45,7 @@ Json.prototype.open = function (newFile) {
 Json.prototype.write = function (obj, cb) {
   cb = cb || function(){};
   this.contents = null;
-  fs.writeFile(this.file, this.encrypt(obj), 0, 'binary', function (err, written, string) {
+  fs.writeFile(this.file, this.encrypt(obj), { encoding: 'binary' }, function (err, written, string) {
     if (err) {
       cb(err, false);
     } else if (written <= 0) {
@@ -58,7 +58,7 @@ Json.prototype.write = function (obj, cb) {
 
 Json.prototype.writeSync = function (obj) {
   this.contents = null;
-  fs.writeFileSync(this.file, this.encrypt(obj), null, 'binary');
+  fs.writeFileSync(this.file, this.encrypt(obj), { encoding: 'binary' });
 }
 
 Json.prototype.read = function (cb) {
