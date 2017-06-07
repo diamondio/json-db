@@ -45,7 +45,7 @@ Json.prototype.open = function (newFile) {
 Json.prototype.write = function (obj, cb) {
   cb = cb || function(){};
   this.contents = null;
-  fs.writeFile(this.file, this.encrypt(obj), { encoding: (this.crypto ? 'binary' : 'utf8') }, function (err, written, string) {
+  fs.writeFile(this.file, this.encrypt(obj), { encoding: 'utf8' }, function (err, written, string) {
     if (err) {
       cb(err, false);
     } else if (written <= 0) {
@@ -58,7 +58,7 @@ Json.prototype.write = function (obj, cb) {
 
 Json.prototype.writeSync = function (obj) {
   this.contents = null;
-  fs.writeFileSync(this.file, this.encrypt(obj), { encoding: (this.crypto ? 'binary' : 'utf8') });
+  fs.writeFileSync(this.file, this.encrypt(obj), { encoding: 'utf8' });
 }
 
 Json.prototype.read = function (cb) {
@@ -83,7 +83,7 @@ Json.prototype.readSync = function () {
     return this.contents;
   }
   try {
-    var data = fs.readFileSync(this.file, { encoding: null });
+    var data = fs.readFileSync(this.file, { encoding: 'utf8' });
     this.contents = this.decrypt(data);
     return this.contents;
   } catch (e) {
