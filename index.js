@@ -83,7 +83,7 @@ Json.prototype.readSync = function () {
     return this.contents;
   }
   try {
-    var data = fs.readFileSync(this.file, { encoding: 'utf8' });
+    var data = fs.readFileSync(this.file, { encoding: null });
     this.contents = this.decrypt(data);
     return this.contents;
   } catch (e) {
