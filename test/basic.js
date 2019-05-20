@@ -6,10 +6,6 @@ describe('Basic API', function () {
 
   const file = './test.json';
 
-  afterEach(function (done) {
-    fs.unlink(file, done)
-  })
-
   it('write/read async', async function () {
     const db = new JsonDB(file);
     let val;
@@ -22,6 +18,18 @@ describe('Basic API', function () {
     assert.deepEqual(val.x, [1,2,3]);
     assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
     assert.equal(val.z, 'xyz');
+    fs.unlinkSync(file);
+  })
+
+  it('write to new file', async function () {
+    const db = new JsonDB('./new.json');
+    let val;
+    val = await db.read();
+    assert.equal(val, null);
+    await db.write({ x: 1 });
+    val = await db.read();
+    assert.deepEqual(val.x, 1);
+    fs.unlinkSync('./new.json');
   })
 
   it('write/read encrypted', async function () {
@@ -36,6 +44,7 @@ describe('Basic API', function () {
     assert.deepEqual(val.x, [1,2,3]);
     assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
     assert.equal(val.z, 'xyz');
+    fs.unlinkSync(file);
   })
 
   it('will fail if password incorrect', async function () {
@@ -51,6 +60,7 @@ describe('Basic API', function () {
     } catch (e) {
       assert.equal(e.message, 'incorrect_key');
     }
+    fs.unlinkSync(file);
   })
 
   it('write/read sync', function () {
@@ -67,6 +77,7 @@ describe('Basic API', function () {
     assert.deepEqual(val.x, [1,2,3]);
     assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
     assert.equal(val.z, 'xyz');
+    fs.unlinkSync(file);
   })
 
 })

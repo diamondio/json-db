@@ -62,7 +62,15 @@ class Json {
 
   async read() {
     if (this.contents === null) {
-      const data = await readFilePromise(this.file, 'utf8');
+      let data;
+      try {
+        data = await readFilePromise(this.file, 'utf8');
+      } catch (e) {
+        if (e.code === 'ENOENT') {
+          return null;
+        }
+        throw e;
+      }
       this.contents = this.decrypt(data);
     }
     return this.contents;
