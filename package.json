@@ -1,6 +1,6 @@
 {
   "name": "@diam/json-db",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Simple Json DB",
   "main": "index.js",
   "engines": {
