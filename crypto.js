@@ -1,28 +1,35 @@
+const crypto = require('crypto');
 
-var crypto = require('crypto');
+const IV_LENGTH = 16; // For AES, this is always 16
 
-function Crypto (opts) {
-  opts = opts || {};
-  if (!opts.key) {
-    throw new Error('No crypto key has been given.');
+
+class Crypto {
+  constructor(opts) {
+    opts = opts || {};
+    if (!opts.key) {
+      throw new Error('No crypto key has been given.');
+    }
+    const hash = crypto.createHmac('sha256', opts.key).digest('hex');
+    this.key = hash.slice(0, 32);
+    this.method = opts.method || 'aes-256-cbc';
   }
-  this.key = opts.key;
-  this.method = opts.method || 'aes256';
-}
+  encrypt(text) {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(this.key), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString('hex') + ':' + encrypted.toString('hex');
+  }
 
-Crypto.prototype.encrypt = function (message) {
-  var cipher = crypto.createCipher(this.method, this.key);
-  var encrypted = cipher.update(message, 'utf8', 'base64') + cipher.final('base64');
-  return new Buffer(encrypted, 'base64');
-}
-
-Crypto.prototype.decrypt = function (encrypted) {
-  try {
-    var decipher = crypto.createDecipher(this.method, this.key);
-    var decrypted = decipher.update(encrypted.toString('base64'), 'base64', 'utf8') + decipher.final('utf8');
-    return decrypted;
-  } catch (e) {
-    return null;
+  decrypt(text) {
+    const textParts = text.split(':');
+    const iv = Buffer.from(textParts.shift(), 'hex');
+    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(this.key), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    const decryptedText = decrypted.toString();
+    return decryptedText;
   }
 }
 

@@ -1,50 +1,68 @@
-var fs     = require('fs');
-var assert = require('assert');
-var JsonDB = require('..');
+const fs     = require('fs');
+const assert = require('assert');
+const JsonDB = require('..');
 
 describe('Basic API', function () {
 
-  var file = './test.json';
+  const file = './test.json';
 
   afterEach(function (done) {
     fs.unlink(file, done)
   })
 
-  beforeEach(function () {
-    this.db = new JsonDB(file);
+  it('write/read async', async function () {
+    const db = new JsonDB(file);
+    let val;
+    await db.write('test');
+    val = await db.read();
+    assert.equal(val, 'test');
+    await db.write({ x: [1,2,3], y: { a: 1, b: 2, c: 3 }, z: 'xyz' });
+    val = await db.read();
+    assert.equal(typeof val, 'object');
+    assert.deepEqual(val.x, [1,2,3]);
+    assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
+    assert.equal(val.z, 'xyz');
   })
 
-  it('write/read async', function (done) {
-    var db = this.db;
-    db.write('test', function (err) {
-      assert.ok(!err);
-      db.read(function (err, val) {
-        assert.ok(!err);
-        assert.equal(val, 'test');
-        db.write({ x: [1,2,3], y: { a: 1, b: 2, c: 3 }, z: 'xyz' }, function (err) {
-          assert.ok(!err);
-          db.read(function (err, val) {
-            assert.ok(!err);
-            assert.equal(typeof val, 'object');
-            assert.deepEqual(val.x, [1,2,3]);
-            assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
-            assert.equal(val.z, 'xyz');
-            done();
-          })
-        })
-      })
-    })
+  it('write/read encrypted', async function () {
+    const db = new JsonDB(file, { key: 'secret' });
+    let val;
+    await db.write('test');
+    val = await db.read();
+    assert.equal(val, 'test');
+    await db.write({ x: [1,2,3], y: { a: 1, b: 2, c: 3 }, z: 'xyz' });
+    val = await db.read();
+    assert.equal(typeof val, 'object');
+    assert.deepEqual(val.x, [1,2,3]);
+    assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
+    assert.equal(val.z, 'xyz');
+  })
+
+  it('will fail if password incorrect', async function () {
+    const db1 = new JsonDB(file, { key: 'secret' });
+    await db1.write('test');
+    const db2 = new JsonDB(file, { key: 'secret' });
+    const val1 = await db2.read();
+    assert.equal(val1, 'test');
+    const db3 = new JsonDB(file, { key: 'wrong' });
+    try {
+      await db3.read();
+      throw new Error('should have thrown');
+    } catch (e) {
+      assert.equal(e.message, 'incorrect_key');
+    }
   })
 
   it('write/read sync', function () {
-    var db = this.db;
-    
+    const db = new JsonDB(file);
+    let val;
+
     db.writeSync('test');
-    var val = db.readSync()
+    val = db.readSync()
     assert.equal(val, 'test');
     
     db.writeSync({ x: [1,2,3], y: { a: 1, b: 2, c: 3 }, z: 'xyz' })
-    var val = db.readSync()
+    val = db.readSync()
     assert.equal(typeof val, 'object');
     assert.deepEqual(val.x, [1,2,3]);
     assert.deepEqual(val.y, { a: 1, b: 2, c: 3 });
